@@ -6,13 +6,18 @@ SCRIPTDIR=$(dirname "$(realpath "$0")")
 # new tests should be added before the replica_pod_remove test
 #TESTS="install basic_volume_io csi replica rebuild node_disconnect/replica_pod_remove uninstall"
 TESTS="install basic_volume_io csi uninstall"
-DEVICE=
-REGISTRY=
-TAG=
+EXTENDED_TESTS=""
 TESTDIR=$(realpath "$SCRIPTDIR/../test/e2e")
 REPORTSDIR=$(realpath "$SCRIPTDIR/..")
-GENERATE_LOGS=0
-ON_FAIL="continue"
+
+# Global state variables
+tests=""
+run_extended_tests=
+device=
+registry=
+tag=
+generate_logs=0
+on_fail="continue"
 
 help() {
   cat <<EOF
@@ -25,10 +30,12 @@ Options:
   --tests <list of tests>   Lists of tests to run, delimited by spaces (default: "$TESTS")
         Note: the last 2 tests should be (if they are to be run)
              node_disconnect/replica_pod_remove uninstall
+  --extended                Run long running tests also.
   --reportsdir <path>       Path to use for junit xml test reports (default: repo root)
   --logs                    Generate logs and cluster state dump at the end of successful test run.
-  --onfail <stop|continue>  On fail, stop immediately or continue default($ON_FAIL)
+  --onfail <stop|continue>  On fail, stop immediately or continue default($on_fail)
                             Behaviour for "continue" only differs if uninstall is in the list of tests (the default).
+
 Examples:
   $0 --registry 127.0.0.1:5000 --tag a80ce0c
 EOF
@@ -39,19 +46,19 @@ while [ "$#" -gt 0 ]; do
   case "$1" in
     -d|--device)
       shift
-      DEVICE=$1
+      device=$1
       ;;
     -r|--registry)
       shift
-      REGISTRY=$1
+      registry=$1
       ;;
     -t|--tag)
       shift
-      TAG=$1
+      tag=$1
       ;;
     -T|--tests)
       shift
-      TESTS="$1"
+      tests="$1"
       ;;
     -R|--reportsdir)
       shift
@@ -62,16 +69,19 @@ while [ "$#" -gt 0 ]; do
       exit 0
       ;;
     -l|--logs)
-      GENERATE_LOGS=1
+      generate_logs=1
+      ;;
+    -e|--extended)
+      run_extended_tests=1
       ;;
     --onfail)
         shift
         case $1 in
             continue)
-                ON_FAIL=$1
+                on_fail=$1
                 ;;
             stop)
-                ON_FAIL=$1
+                on_fail=$1
                 ;;
             *)
                 help
@@ -87,19 +97,26 @@ while [ "$#" -gt 0 ]; do
   shift
 done
 
-if [ -z "$DEVICE" ]; then
+if [ -z "$device" ]; then
   echo "Device for storage pools must be specified"
   help
   exit 1
 fi
-export e2e_pool_device=$DEVICE
+export e2e_pool_device=$device
 
-if [ -n "$TAG" ]; then
-  export e2e_image_tag="$TAG"
+if [ -n "$tag" ]; then
+  export e2e_image_tag="$tag"
 fi
 
-if [ -n "$REGISTRY" ]; then
-  export e2e_docker_registry="$REGISTRY"
+if [ -n "$registry" ]; then
+  export e2e_docker_registry="$registry"
+fi
+
+if [ -z "$tests" ]; then
+  tests="$TESTS"
+  if [ -n "$run_extended_tests" ]; then
+    tests="$tests $EXTENDED_TESTS"
+  fi
 fi
 
 export e2e_reports_dir="$REPORTSDIR"
@@ -131,8 +148,8 @@ contains() {
     [[ $1 =~ (^|[[:space:]])$2($|[[:space:]]) ]] && return 0  || return 1
 }
 
-echo "list of tests: $TESTS"
-for dir in $TESTS; do
+echo "list of tests: $tests"
+for dir in $tests; do
   # defer uninstall till after other tests have been run.
   if [ "$dir" != "uninstall" ] ;  then
       if ! runGoTest "$dir" ; then
@@ -154,13 +171,13 @@ if [ "$test_failed" -ne 0 ]; then
         :
     fi
 
-    if [ "$ON_FAIL" == "stop" ]; then
+    if [ "$on_fail" == "stop" ]; then
         exit 3
     fi
 fi
 
 # Always run uninstall test if specified
-if contains "$TESTS" "uninstall" ; then
+if contains "$tests" "uninstall" ; then
     if ! runGoTest "uninstall" ; then
         test_failed=1
         if ! "$SCRIPTDIR"/e2e-cluster-dump.sh --clusteronly ; then
@@ -175,7 +192,7 @@ if [ "$test_failed" -ne 0 ]; then
   exit 1
 fi
 
-if [ "$GENERATE_LOGS" -ne 0 ]; then
+if [ "$generate_logs" -ne 0 ]; then
     if ! "$SCRIPTDIR"/e2e-cluster-dump.sh ; then
         # ignore failures in the dump script
         :

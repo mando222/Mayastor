@@ -44,6 +44,8 @@ if (currentBuild.getBuildCauses('jenkins.branch.BranchIndexingCause') &&
 
 // Only schedule regular builds on develop branch, so we don't need to guard against it
 String cron_schedule = BRANCH_NAME == "develop" ? "0 2 * * *" : ""
+// Some long e2e tests are not suitable to be run for each PR
+boolean run_extended_e2e_tests = (env.BRANCH_NAME != 'staging' && env.BRANCH_NAME != 'trying') ? true : false
 
 pipeline {
   agent none
@@ -155,7 +157,13 @@ pipeline {
         sh "./scripts/release.sh --alias-tag ci --registry ${env.REGISTRY}"
         withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
           sh 'kubectl get nodes -o wide'
-          sh "nix-shell --run './scripts/e2e-test.sh --device /dev/nvme1n1 --tag \"${env.GIT_COMMIT_SHORT}\" --registry \"${env.REGISTRY}\"'"
+          script {
+            def cmd = "./scripts/e2e-test.sh --device /dev/nvme1n1 --tag \"${env.GIT_COMMIT_SHORT}\" --registry \"${env.REGISTRY}\""
+            if (run_extended_e2e_tests) {
+              cmd = cmd + " --extended"
+            }
+            sh "nix-shell --run '${cmd}'"
+          }
         }
       }
       // Always remove all docker images because they are usually used just once
