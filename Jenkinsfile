@@ -66,6 +66,9 @@ pipeline {
 
   stages {
     stage('init') {
+      when {
+        expression { false == true }
+      }
       agent { label 'nixos-mayastor' }
       steps {
         step([
@@ -81,6 +84,7 @@ pipeline {
     stage('linter') {
       agent { label 'nixos-mayastor' }
       when {
+        expression { false == true }
         beforeAgent true
         not {
           anyOf {
@@ -107,6 +111,9 @@ pipeline {
       }
       parallel {
         stage('rust unit tests') {
+          when {
+            expression { false == true }
+          }
           agent { label 'nixos-mayastor' }
           steps {
             sh 'printenv'
@@ -121,6 +128,9 @@ pipeline {
         }
         stage('grpc tests') {
           agent { label 'nixos-mayastor' }
+          when {
+            expression { false == true }
+          }
           steps {
             sh 'printenv'
             sh 'nix-shell --run "./scripts/grpc-test.sh"'
@@ -133,6 +143,9 @@ pipeline {
         }
         stage('moac unit tests') {
           agent { label 'nixos-mayastor' }
+          when {
+            expression { false == true }
+          }
           steps {
             sh 'printenv'
             sh 'nix-shell --run "./scripts/moac-test.sh"'
@@ -240,6 +253,7 @@ pipeline {
     stage('push images') {
       agent { label 'nixos-mayastor' }
       when {
+        expression { false == true }
         beforeAgent true
         anyOf {
           branch 'master'
