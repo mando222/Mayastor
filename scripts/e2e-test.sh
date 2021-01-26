@@ -26,7 +26,8 @@ Options:
         Note: the last 2 tests should be (if they are to be run)
              node_disconnect/replica_pod_remove uninstall
   --reportsdir <path>       Path to use for junit xml test reports (default: repo root)
-  --logs                    Generate logs and cluster state dump at the end of successful test run.
+  --logs                    Generate logs and cluster state dump at the end of successful test run,
+                            prior to uninstall.
   --onfail <stop|continue>  On fail, stop immediately or continue default($ON_FAIL)
                             Behaviour for "continue" only differs if uninstall is in the list of tests (the default).
 Examples:
@@ -148,6 +149,13 @@ for dir in $TESTS; do
   fi
 done
 
+if [ "$GENERATE_LOGS" -ne 0 ]; then
+    if ! "$SCRIPTDIR"/e2e-cluster-dump.sh ; then
+        # ignore failures in the dump script
+        :
+    fi
+fi
+
 if [ "$test_failed" -ne 0 ]; then
     if ! "$SCRIPTDIR"/e2e-cluster-dump.sh ; then
         # ignore failures in the dump script
@@ -173,13 +181,6 @@ fi
 if [ "$test_failed" -ne 0 ]; then
     echo "At least one test has FAILED!"
   exit 1
-fi
-
-if [ "$GENERATE_LOGS" -ne 0 ]; then
-    if ! "$SCRIPTDIR"/e2e-cluster-dump.sh ; then
-        # ignore failures in the dump script
-        :
-    fi
 fi
 
 echo "All tests have PASSED!"
