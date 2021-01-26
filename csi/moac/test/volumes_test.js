@@ -113,7 +113,7 @@ module.exports = function () {
       nexus = new Nexus({
         uuid: UUID,
         size: 95,
-        deviceUri: 'file:///dev/nbd0',
+        deviceUri: 'nvmf://host/nqn',
         state: 'NEXUS_ONLINE',
         children: [
           {
@@ -143,7 +143,7 @@ module.exports = function () {
       requiredNodes: [],
       requiredBytes: 90,
       limitBytes: 110,
-      protocol: 'nbd'
+      protocol: 'nvmf'
     }, 'pending', 95, published ? 'node1' : undefined);
     volumes.volumes[UUID] = volume;
 
@@ -175,7 +175,7 @@ module.exports = function () {
           requiredNodes: ['node2', 'node3'],
           requiredBytes: 100,
           limitBytes: 110,
-          protocol: 'nbd'
+          protocol: 'nvmf'
         })
       );
       expect(volEvents).to.have.lengthOf(3);
@@ -204,7 +204,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 90,
         limitBytes: 0,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
       expect(volume.size).to.equal(90);
       expect(volume.state).to.equal('healthy');
@@ -237,7 +237,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 10,
         limitBytes: 50,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
       expect(volume.size).to.equal(50);
       expect(volume.state).to.equal('healthy');
@@ -261,7 +261,7 @@ module.exports = function () {
           requiredNodes: [],
           requiredBytes: 0,
           limitBytes: 0,
-          protocol: 'nbd'
+          protocol: 'nvmf'
         })
       );
       sinon.assert.notCalled(stub1);
@@ -300,7 +300,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 10,
         limitBytes: 50,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
       sinon.assert.notCalled(stub2);
       sinon.assert.notCalled(stub3);
@@ -353,7 +353,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 10,
         limitBytes: 50,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
       await waitUntil(
         () =>
@@ -532,7 +532,7 @@ module.exports = function () {
       requiredNodes: [],
       requiredBytes: 10,
       limitBytes: 50,
-      protocol: 'nbd'
+      protocol: 'nvmf'
     };
 
     it('should import a volume and fault it if there are no replicas', async () => {
@@ -612,7 +612,7 @@ module.exports = function () {
     });
 
     it('should import published volume with nexus', async () => {
-      const deviceUri = 'nbd:///dev/ndb0';
+      const deviceUri = 'nvmf://host/nqn';
       const replica = new Replica({
         uuid: UUID,
         size: 40,
@@ -694,7 +694,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 90,
         limitBytes: 110,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
       volume.newReplica(replica);
       volumes.volumes[UUID] = volume;
@@ -719,7 +719,7 @@ module.exports = function () {
         requiredNodes: [node1.name],
         requiredBytes: 89,
         limitBytes: 111,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
       sinon.assert.notCalled(stub1);
       sinon.assert.notCalled(stub2);
@@ -742,7 +742,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 90,
         limitBytes: 110,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
       sinon.assert.notCalled(stub1);
       sinon.assert.notCalled(stub2);
@@ -759,7 +759,7 @@ module.exports = function () {
           requiredNodes: [],
           requiredBytes: 90,
           limitBytes: 94,
-          protocol: 'nbd'
+          protocol: 'nvmf'
         })
       );
     });
@@ -772,7 +772,7 @@ module.exports = function () {
           requiredNodes: [],
           requiredBytes: 96,
           limitBytes: 110,
-          protocol: 'nbd'
+          protocol: 'nvmf'
         })
       );
     });
@@ -784,7 +784,7 @@ module.exports = function () {
         requiredNodes: [node1.name],
         requiredBytes: 89,
         limitBytes: 111,
-        protocol: 'nvmf'
+        protocol: 'iscsi'
       }));
     });
   });
@@ -870,7 +870,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 90,
         limitBytes: 110,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
 
       await waitUntil(
@@ -968,7 +968,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 90,
         limitBytes: 110,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
 
       await waitUntil(
@@ -1000,7 +1000,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 90,
         limitBytes: 110,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
 
       try {
@@ -1042,7 +1042,7 @@ module.exports = function () {
         requiredNodes: ['node2', 'node3'],
         requiredBytes: 90,
         limitBytes: 110,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
 
       await waitUntil(
@@ -1094,7 +1094,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 90,
         limitBytes: 110,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
       await waitUntil(() => volume.state === 'degraded', 'degraded volume');
 
@@ -1223,7 +1223,7 @@ module.exports = function () {
         ]
       });
       stub1.onCall(1).resolves({
-        deviceUri: 'file:///dev/nbd0'
+        deviceUri: 'nvmf://host/nqn'
       });
 
       // we unbind the nexus - that happens when node goes down
@@ -1240,7 +1240,7 @@ module.exports = function () {
         object: node1
       });
       await waitUntil(() => volume.state === 'healthy', 'healthy volume');
-      expect(volume.nexus.deviceUri).to.equal('file:///dev/nbd0');
+      expect(volume.nexus.deviceUri).to.equal('nvmf://host/nqn');
       expect(volume.publishedOn).to.equal('node1');
     });
 
@@ -1371,7 +1371,7 @@ module.exports = function () {
         requiredNodes: [],
         requiredBytes: 90,
         limitBytes: 110,
-        protocol: 'nbd'
+        protocol: 'nvmf'
       });
 
       sinon.assert.calledOnce(stub1);
@@ -1422,7 +1422,7 @@ module.exports = function () {
     });
 
     it('should publish the volume', async () => {
-      const deviceUri = 'file:///dev/nbd0';
+      const deviceUri = 'nvmf://host/nqn';
       // on node 1 is created nexus
       stub1.onCall(0).resolves({
         uuid: UUID,
@@ -1452,7 +1452,7 @@ module.exports = function () {
       // on node 3 is shared replica
       stub3.onCall(0).resolves({ uri: 'nvmf://replica3' });
 
-      const uri = await volume.publish('nbd');
+      const uri = await volume.publish('nvmf');
       expect(uri).to.equal(deviceUri);
 
       sinon.assert.calledTwice(stub1);
@@ -1464,7 +1464,7 @@ module.exports = function () {
       sinon.assert.calledWithMatch(stub1.secondCall, 'publishNexus', {
         uuid: UUID,
         key: '',
-        share: enums.NEXUS_NBD
+        share: enums.NEXUS_NVMF
       });
 
       sinon.assert.calledOnce(stub2);
