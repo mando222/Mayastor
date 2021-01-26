@@ -4063,6 +4063,8 @@ dependencies = [
  "snafu",
  "state",
  "structopt",
+ "strum",
+ "strum_macros",
  "tokio",
  "tonic",
  "tracing",

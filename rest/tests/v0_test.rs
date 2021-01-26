@@ -67,7 +67,7 @@ async fn client() {
             Binary::from_dbg("mayastor")
                 .with_nats("-n")
                 .with_args(vec!["-N", mayastor])
-                .with_args(vec!["-g", "10.1.0.7:10124"]),
+                .with_args(vec!["-g", "mayastor:10124"]),
         )
         .add_container_spec(
             ContainerSpec::from_image(
@@ -104,7 +104,7 @@ async fn client_test(mayastor: &NodeId, test: &ComposeTest) {
         nodes.first().unwrap(),
         &Node {
             id: mayastor.clone(),
-            grpc_endpoint: "10.1.0.7:10124".to_string(),
+            grpc_endpoint: "mayastor:10124".to_string(),
             state: NodeState::Online,
         }
     );
@@ -154,7 +154,7 @@ async fn client_test(mayastor: &NodeId, test: &ComposeTest) {
             thin: false,
             size: 12582912,
             share: Protocol::Nvmf,
-            uri: "nvmf://10.1.0.7:8420/nqn.2019-05.io.openebs:replica1"
+            uri: "nvmf://mayastor:8420/nqn.2019-05.io.openebs:replica1"
                 .to_string(),
         }
     );
