@@ -66,8 +66,12 @@ function cluster-describe {
     kubectl -n mayastor describe msv
     echo "-- Mayastor Nodes --------------------"
     kubectl -n mayastor describe msn
-    echo "-- K8s Nodes -----------------------------"
+    echo "-- K8s Nodes -------------------------"
     kubectl describe nodes
+    echo "-- K8s Deployments -------------------"
+    kubectl -n mayastor describe deployments
+    echo "-- K8s Daemonsets --------------------"
+    kubectl -n mayastor describe daemonsets
 }
 
 function logs-csi-containers {
