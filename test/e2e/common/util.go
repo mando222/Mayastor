@@ -999,9 +999,9 @@ func DeletePools() {
 	if err == nil && pools != nil && len(pools.Items) != 0 {
 		logf.Log.Info("DeletePools: deleting MayastorPools")
 		for _, pool := range pools.Items {
-			logf.Log.Info("DeletePools: deleting", "pool",  pool.GetName())
+			logf.Log.Info("DeletePools: deleting", "pool", pool.GetName())
 			err = gTestEnv.DynamicClient.Resource(poolGVR).Namespace("mayastor").Delete(context.TODO(), pool.GetName(), metav1.DeleteOptions{})
-			if  err != nil {
+			if err != nil {
 				logf.Log.Error(err, "Failed to delete pool")
 			}
 		}

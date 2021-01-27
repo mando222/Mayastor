@@ -240,19 +240,19 @@ func installMayastor() {
 
 	// Given the yaml files and the environment described in the test readme,
 	// we expect mayastor to be running on exactly numMayastorInstances nodes.
-	Eventually(func () int {
+	Eventually(func() int {
 		return mayastorReadyPodCount()
-		},
-			"180s", // timeout
-			"1s", 	// polling interval
+	},
+		"180s", // timeout
+		"1s",   // polling interval
 	).Should(Equal(numMayastorInstances))
 
 	// Wait for MOAC to be ready before creating the pools,
 	Eventually(func() bool {
 		return moacReady()
-		},
-			"360s", // timeout
-			"2s", // polling interval
+	},
+		"360s", // timeout
+		"2s",   // polling interval
 	).Should(Equal(true))
 
 	// Now create pools on all nodes.
